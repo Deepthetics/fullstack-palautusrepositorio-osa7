@@ -4,6 +4,7 @@ import {
     Routes, Route, Link, 
     useParams, useNavigate
 } from 'react-router-dom'
+import { useField } from './hooks'
 
 const Menu = () => {
   const padding = {
@@ -64,22 +65,38 @@ const Footer = () => (
 )
 
 const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  const content = useField('content')
+  const author = useField('author')
+  const info = useField('info')
 
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0
     })
     navigate('/')
   }
+
+  const handleReset = () => {
+    content.reset()
+    author.reset()
+    info.reset()
+  }
+
+  const extractInputArgs = (object) => {
+    const { reset, ...rest } = object
+    return (rest)
+  }
+
+  const contentArgs = extractInputArgs(content)
+  const authorArgs = extractInputArgs(author)
+  const infoArgs = extractInputArgs(info)
+
 
   return (
     <div>
@@ -87,21 +104,21 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input {...contentArgs} />
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input {...authorArgs} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input {...infoArgs} />
         </div>
-        <button>create</button>
+        <button type='submit'>create</button>
+        <button type='button' onClick={handleReset}>reset</button>
       </form>
     </div>
   )
-
 }
 
 const App = () => {
@@ -157,7 +174,7 @@ const App = () => {
           <Route path='/' element={<AnecdoteList anecdotes={anecdotes}/>} />
           <Route path='/create' element={<CreateNew addNew={addNew}/>} />
           <Route path='/about' element={<About />} />
-          <Route path='/anecdotes/:id' element={<Anecdote anecdotes={anecdotes}/>} />
+          <Route path='/anecdotes/:id' element={<Anecdote anecdotes={anecdotes} />} />
         </Routes>
         <Footer />
       </Router>
